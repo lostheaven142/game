@@ -32,8 +32,9 @@ io.on("connection", function(socket){
         infoNew.name = data;
         infoNew.id = socket.id;
         gamers.push(infoNew);
-        socket.emit("All users",gamers);
-        socket.broadcast.emit("All users",[infoNew]);
+        io.sockets.emit("All users",[infoNew]);
+        socket.broadcast.emit("All users without me",[infoNew]);
+        socket.emit("I am the one", infoNew);
     })
     
     socket.on('Coordinates', function(coordinate){
@@ -62,7 +63,7 @@ io.on("connection", function(socket){
         // console.log("отправил сообщение");
     })
     socket.on('Click', function(del){
-        // console.log(del);
+        // console.log("loool"+del);
         io.sockets.emit('Delete',del);
     })
     socket.on('Score', function(score){
@@ -100,7 +101,7 @@ setInterval(function(){
         randomOb.forOb = ranOb;
         // console.log(ran);
         io.sockets.emit('smth',randomOb);
-},3000);
+},2500);
 
 
 server.listen(process.env.PORT, process.env.HOST);

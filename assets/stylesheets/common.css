@@ -1,8 +1,11 @@
+
 body{
     background-color: #2d4b55;
     height: 100%;
     width: 100%;
     overflow-x:hidden;
+    /*cursor: auto;*/
+    /*cursor: url(/images/ghost.cur), auto;*/
 } 
 .title{
     position:fixed;
@@ -57,9 +60,10 @@ form{
 }
 .ghost{
     position: absolute;
-    width: 170px;
-    height:170px;
-    background: url(/images/ghost2.png) no-repeat;
+    width: 95px;
+    height:110px;
+    background: url(/images/ghost.png) no-repeat;
+    background-position: bottom;
     /*top:0;*/
     /*left:0;*/
     opacity:0.8;
@@ -78,11 +82,12 @@ form{
 }
 .content{
     position: absolute;
-    width:100%;
-    height: 450px;
+    width:480px;
+    height: 430px;
     background:#638087;
     overflow: scroll;
     overflow-x:hidden;
+    padding: 10px;
 }
 .content p{
     color: white;
