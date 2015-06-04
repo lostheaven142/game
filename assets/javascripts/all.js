@@ -15,21 +15,20 @@ $( document ).ready(function() {
         var myTextField = document.getElementById('name');
 	    socket.emit('New', myTextField.value)
 	    socket.on('All users', function(name){
-	       //console.log(name)
-	       for (var i=0;i<name.length;i++){
-	           var div = document.createElement('div');
-    	       div.id = name[i].name;
-    	       div.className = "ghost"; 
-    	       //div.innerText = "I'm a "+name[i].name;
-    	       div.innerText = name[i].name;
-    	       $('body').append(div);
-    	       $('.content').html()+$('.content').append('<b>'+name[i].name+' is connected !</b><br><br>');
-	       }
+	        //console.log(name)
+	        for (var i=0;i<name.length;i++){
+	           // console.log('name is '+name)
+	           // console.log('name[i] is '+name[i])
+	           // console.log('name[i].name is '+name[i].name)
+	            var div = document.createElement('div');
+    	        div.id = name[i].name;
+    	        div.className = "ghost"; 
+    	        //div.innerText = "I'm a "+name[i].name;
+    	        div.innerText = name[i].name;
+    	        $('body').append(div);
+    	        $('.content').html()+$('.content').append('<b>'+name[i].name+' is connected !</b><br><br>');
+            }
 	    })
-	   // socket.on('All users', function(connect){
-	   //     console.log(connect)
-	   //     $('.content').html()+$('.content').append('<b>'+connect.name+' is connected !</b><br><br>');
-	   // })
 	    socket.on('I am the one', function(hello){
 	        console.log(hello)
 	        $('.content').html()+$('.content').append('<p>Hello, ' +hello.name+' !</p><br><br>');
@@ -51,12 +50,12 @@ $( document ).ready(function() {
             $('#'+evilMan).css('opacity',0);
         })
         $(window).on('mousemove', function(e){
-            var left = e.pageX-42;
-            var top = e.pageY-44;
+            var left = e.pageX+5;
+            var top = e.pageY+5;
             $('#'+myTextField.value).css('left',left+'px').css('top',top+'px');
             socket.emit('Coordinates',{left:left,top:top,name:myTextField.value});
-            
         })
+	    
     })
     socket.on('smth', function(randomOb){
         // console.log(randomOb)
@@ -125,7 +124,6 @@ $( document ).ready(function() {
                 $('.score').html()
             }
         });
-        
         socket.on('Delete', function(del) {
             // console.log('loooool'+del)
             $('.'+del).removeClass("elem1");
@@ -142,4 +140,41 @@ $( document ).ready(function() {
     socket.on('Score', function(score){
         $('.content').html()+$('.content').append('<b>'+score.name+' : '+score.count+'</b><br><br>');
     })
+    $('body').on('click','.ghost', function() {
+            // console.log('cliiick on ghost')
+            var n = 1;
+    	        if (n == 1){
+                    // console.log('+1');
+                    var clickId = this.id;
+                    // console.log(clickId);
+                    // $('html').css('cursor', "url('/images/ghost2.png'), auto");
+                    // setTimeout(function() {
+                        // $('html').css('cursor', "url('/images/ghost.png'), auto");
+                    // }, 600);
+                    var now = $('.score').html()
+                    var plus = 1
+                    $('.score').html(parseInt(now)+parseInt(plus));
+                    socket.emit('ClickGhost',clickId);
+                    
+                    var nameScore = document.getElementById('name').value;
+                    var countScore = document.getElementById('score').textContent;
+                    var score = {}
+                    score.name = nameScore
+                    score.count = countScore
+                    socket.emit('Score', score)
+                    n = n+1
+                    setTimeout(function() {
+                        n = n-1
+                    }, 1000);
+                    
+                    // console.log(v)
+                }
+                else{
+                    $('.score').html()
+                }
+                socket.on('scaresGhost', function(ScaredGhost){
+                    console.log('olololo -1')
+                    $('.content').html()+$('.content').append('<b>'+ScaredGhost+' : '+'-1'+'</b><br><br>');
+                })
+	    })
 });

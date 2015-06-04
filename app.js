@@ -66,6 +66,11 @@ io.on("connection", function(socket){
         // console.log("loool"+del);
         io.sockets.emit('Delete',del);
     })
+    socket.on('ClickGhost', function(clickOnGhost) {
+        console.log(clickOnGhost);
+        io.to('clickOnGhost').emit('scaresGhost', clickOnGhost);
+        
+    })
     socket.on('Score', function(score){
         // console.log(score)
         socket.broadcast.emit('Score',score);
