@@ -6,7 +6,10 @@ var express = require('express'),
     jade = require('jade'),
     routing  = require('./routing'),
     
-    gamers = [];
+    gamers = [],
+    
+    clickByHim ;
+    
 
 
 app.set('views', './views');
@@ -25,16 +28,20 @@ app.get('/', function(req,res){
 
 
 io.on("connection", function(socket){
-    console.log(socket.id + "connected")
+    // console.log(socket.id + "connected")
     
     socket.on('New', function(data) {
+        socket.emit("All users",gamers);
         var infoNew = {};
         infoNew.name = data;
         infoNew.id = socket.id;
+        infoNew.score = 0;
         gamers.push(infoNew);
-        io.sockets.emit("All users",[infoNew]);
-        socket.broadcast.emit("All users without me",[infoNew]);
+        socket.broadcast.emit("All users",[infoNew]);
+        // io.sockets.emit("All users",[infoNew]);
+        // socket.broadcast.emit("All users without me",[infoNew]);
         socket.emit("I am the one", infoNew);
+        socket.emit('myId', infoNew.id);
     })
     
     socket.on('Coordinates', function(coordinate){
@@ -67,25 +74,51 @@ io.on("connection", function(socket){
         io.sockets.emit('Delete',del);
     })
     socket.on('ClickGhost', function(clickOnGhost) {
-        console.log(clickOnGhost);
-        io.to('clickOnGhost').emit('scaresGhost', clickOnGhost);
+        // console.log(clickOnGhost);
+        for (var i = 0; i < gamers.length; i++) {
+            if(gamers[i].id==clickOnGhost){
+                if(gamers[i].score>0){
+                    socket.emit('heHaveScore', clickOnGhost)
+                    io.to(clickOnGhost).emit('scaresGhost', clickOnGhost);
+                }
+            }
+        }
         
     })
+    // socket.on('ClickBy', function(idOfClick){
+    //     for(var i=0; i<gamers.length;i++){
+    //         if(gamers[i].id==idOfClick){
+    //             clickByHim = gamers[i].id;
+    //             // console.log('получено '+clickByHim);
+    //         }
+    //     }
+    // })
+    // socket.on('canGive', function(haveScore){
+    //     io.to(clickByHim).emit('canTake', haveScore)
+    //     // console.log('передаю '+clickBy+' значение '+haveScore)
+    //     // clickByHim = ''
+    //     // console.log('переменная стала равна '+clickBy)
+    // })
+    
     socket.on('Score', function(score){
-        // console.log(score)
+        for(var i=0;i<gamers.length;i++){
+            if(gamers[i].id==socket.id){
+                gamers[i].score=score.count;
+            }
+        }
         socket.broadcast.emit('Score',score);
     })
     
     
     socket.on('disconnect', function() {
-        console.log(gamers.indexOf(socket.id));
-        console.log(gamers);
+        // console.log(gamers.indexOf(socket.id));
+        // console.log(gamers);
         for(var i=0;i<gamers.length;i++){
             if(gamers[i].id==socket.id){
                 socket.broadcast.emit('disco',gamers[i].name);
                 gamers.splice(gamers.indexOf(gamers[i]),1);
                 // delete gamers[i]
-                console.log(gamers);
+                // console.log(gamers);
             }
         }
     });

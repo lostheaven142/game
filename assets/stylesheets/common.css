@@ -66,6 +66,18 @@ form{
     background-position: bottom;
     /*top:0;*/
     /*left:0;*/
+    opacity:0.7;
+    z-index:2;
+    color: #638087;
+}
+.ghostclick{
+    position: absolute;
+    width: 95px;
+    height:110px;
+    background: url(/images/ghost.png) no-repeat;
+    background-position: bottom;
+    /*top:0;*/
+    /*left:0;*/
     opacity:0.8;
     z-index:2;
     color: #638087;

@@ -1,15 +1,21 @@
 $( document ).ready(function() {
     var socket = io.connect('http://node-lostheaven142.c9.io/')
-        
+    // document.body.onclick = function() {
+    //     document.body.onselectstart = function() { return false };
+    //     document.body.onmousedown = function() { return false };
+    // }
+
     $('.post').on('click', function(){
         $('.comment').val()
         socket.emit('new message', {user:document.getElementById('name').value,message:$('.comment').val()})
-        $('.content').html()+$('.content').append('<b>'+document.getElementById('name').value+'</b>: <p>'+$('.comment').val()+'</p><br><br>')
+        $('.content').html()+$('.content').append('<div class="comment-wrapper"><b>'+document.getElementById('name').value+'</b>: <p>'+$('.comment').val()+'</p></div><br>')
+        $('.content').scrollTop($('div.comment-wrapper:last').offset().top);
         $('.comment').val('')
         console.log($('.comment').val())
     })
     socket.on('message for all', function(createNewMessage){
-        $('.content').html()+$('.content').append('<b>'+createNewMessage.user+'</b>: <p>'+createNewMessage.message+'</p><br><br>')
+        $('.content').html()+$('.content').append('<div class="comment-wrapper"><b>'+createNewMessage.user+'</b>: <p>'+createNewMessage.message+'</p></div><br>')
+        $('.content').scrollTop($('div.comment-wrapper:last').offset().top); 
     })
     $('.button').on('click', function(event){
         var myTextField = document.getElementById('name');
@@ -22,18 +28,24 @@ $( document ).ready(function() {
 	           // console.log('name[i].name is '+name[i].name)
 	            var div = document.createElement('div');
     	        div.id = name[i].name;
+    	        div.dataset.index=name[i].id;
     	        div.className = "ghost"; 
     	        //div.innerText = "I'm a "+name[i].name;
     	        div.innerText = name[i].name;
     	        $('body').append(div);
-    	        $('.content').html()+$('.content').append('<b>'+name[i].name+' is connected !</b><br><br>');
+    	        $('.content').html()+$('.content').append('<div class="comment-wrapper"><b>'+name[i].name+' joined !</b></div><br>');
             }
 	    })
 	    socket.on('I am the one', function(hello){
-	        console.log(hello)
-	        $('.content').html()+$('.content').append('<p>Hello, ' +hello.name+' !</p><br><br>');
+	       // console.log(hello)
+	        $('.content').html()+$('.content').append('<div class="comment-wrapper"><p>Hello, ' +hello.name+'!</p><br><br><p>Man: +1 point<br>Cat: -1 point<br> You can steal points from another ghost</p></div><br>');
+	        $('.content').scrollTop($('div.comment-wrapper:last').offset().top); 
+	        $('html').css('cursor', "url('/images/ghost1.png'), auto");
+	        
 	    })
-        $('form').animate({opacity:0}, 500);
+	   // $('form').css('top','-100px')
+	    $('form').animate({top:-500}, 500);
+        // $('form').animate({opacity:0}, 500);
         $('.chat').animate({opacity:1, zIndex:10}, 500);
         $('.score').animate({opacity:1}, 500);
         $('html').css('cursor', "url('/images/cursor.png'), auto");
@@ -45,13 +57,14 @@ $( document ).ready(function() {
         })
         socket.on('disco', function(evilMan){
             console.log(evilMan);
-            $('.content').html()+$('.content').append('<b>' +evilMan+' is died</b><br><br>');
+            $('.content').html()+$('.content').append('<div class="comment-wrapper"><b>' +evilMan+' died</b></div><br>');
+            $('.content').scrollTop($('div.comment-wrapper:last').offset().top); 
             $('#'+evilMan).remove();
             $('#'+evilMan).css('opacity',0);
         })
         $(window).on('mousemove', function(e){
-            var left = e.pageX+5;
-            var top = e.pageY+5;
+            var left = e.pageX;
+            var top = e.pageY+10;
             $('#'+myTextField.value).css('left',left+'px').css('top',top+'px');
             socket.emit('Coordinates',{left:left,top:top,name:myTextField.value});
         })
@@ -69,13 +82,18 @@ $( document ).ready(function() {
         $('.elem1').on('click', function() {
             if (v == 1){
                 console.log('+1');
-                // $('html').css('cursor', "url('/images/ghost2.png'), auto");
+                $('html').css('cursor', "url('/images/ghost2.png'), auto");
                 setTimeout(function() {
-                    // $('html').css('cursor', "url('/images/ghost.png'), auto");
+                    $('html').css('cursor', "url('/images/ghost1.png'), auto");
                 }, 600);
                 var now = $('.score').html()
                 var plus = 1
                 $('.score').html(parseInt(now)+parseInt(plus));
+                // $('.score').animate({transform:'scale(2)'}, 500);
+                $('.score').css('transform', 'scale(3)');
+                setTimeout(function() {
+                    $('.score').css('transform', 'scale(1)');
+                }, 100);
                 socket.emit('Click','box'+randomOb.forBox);
                 
                 var nameScore = document.getElementById('name').value;
@@ -99,26 +117,33 @@ $( document ).ready(function() {
                 audio.src = '/images/cat.mp3';
                 audio.autoplay = true;
                 console.log('-1');
-                // $('html').css('cursor', "url('/images/ghost3.png'), auto");
-                var now = $('.score').html()
-                var minus = 1
-                $('.score').html(parseInt(now)-parseInt(minus));
-                socket.emit('Click','box'+randomOb.forBox);
-                
-                var nameScore = document.getElementById('name').value;
-                var countScore = document.getElementById('score').textContent;
-                var score = {}
-                score.name = nameScore
-                score.count = countScore
-                socket.emit('Score', score)
-                setTimeout(function() {
-                    // $('html').css('cursor', "url('/images/ghost.png'), auto");
-                }, 1000);
-                setTimeout(function() {
-                    $('.box'+randomOb.forBox).animate({opacity:0}, 300);
-                    $('.box'+randomOb.forBox).removeClass('elem3')
-                }, 300);
-                v = v+1
+                $('html').css('cursor', "url('/images/ghost3.png'), auto");
+                if($('.score').html() > '0'){
+                    var now = $('.score').html()
+                    var minus = 1
+                    $('.score').html(parseInt(now)-parseInt(minus));
+                    $('.score').css('transform', 'scale(3)');
+                    $('.score').css('color', 'red');
+                    setTimeout(function() {
+                        $('.score').css('transform', 'scale(1)');
+                        $('.score').css('color', 'white');
+                    }, 100);
+                    
+                    var nameScore = document.getElementById('name').value;
+                    var countScore = document.getElementById('score').textContent;
+                    var score = {}
+                    score.name = nameScore
+                    score.count = countScore
+                    socket.emit('Score', score)
+                    setTimeout(function() {
+                        $('html').css('cursor', "url('/images/ghost1.png'), auto");
+                    }, 1000);
+                    setTimeout(function() {
+                        $('.box'+randomOb.forBox).animate({opacity:0}, 300);
+                        $('.box'+randomOb.forBox).removeClass('elem3')
+                    }, 300);
+                    v = v+1
+                }
             }
             else{
                 $('.score').html()
@@ -138,43 +163,85 @@ $( document ).ready(function() {
         }, 2500);
     })
     socket.on('Score', function(score){
-        $('.content').html()+$('.content').append('<b>'+score.name+' : '+score.count+'</b><br><br>');
+        $('.content').html()+$('.content').append('<div class="comment-wrapper"> <b>'+score.name+': '+score.count+'</b></div><br>');
+        $('.content').scrollTop($('div.comment-wrapper:last').offset().top); 
+        // $('.content').html()+$('.content').append('<b>'+score.name+': '+score.count+'</b><br><br>');
     })
+    
+    
+    function coolingClickGhost(ghost){
+        $(ghost).removeClass('cooling');
+        
+    }
+    
     $('body').on('click','.ghost', function() {
-            // console.log('cliiick on ghost')
-            var n = 1;
-    	        if (n == 1){
-                    // console.log('+1');
-                    var clickId = this.id;
-                    // console.log(clickId);
-                    // $('html').css('cursor', "url('/images/ghost2.png'), auto");
-                    // setTimeout(function() {
-                        // $('html').css('cursor', "url('/images/ghost.png'), auto");
-                    // }, 600);
-                    var now = $('.score').html()
-                    var plus = 1
-                    $('.score').html(parseInt(now)+parseInt(plus));
-                    socket.emit('ClickGhost',clickId);
+                if($(this).hasClass('cooling')){
+                    var canClick = false;
+                }else{
+                    var canClick = true;   
+                }
+                if(canClick){
+                    $(this).addClass('cooling');
                     
-                    var nameScore = document.getElementById('name').value;
-                    var countScore = document.getElementById('score').textContent;
-                    var score = {}
-                    score.name = nameScore
-                    score.count = countScore
-                    socket.emit('Score', score)
-                    n = n+1
+                    // socket.on('myId', function(itSmyId){
+                    //     socket.emit('ClickBy',itSmyId)
+                    // })
+                    // socket.emit('ClickGhost',this.dataset.index)
+                    
+                    var obj = this;
+                    $('html').css('cursor', "url('/images/ghost2.png'), auto");
+                    
                     setTimeout(function() {
-                        n = n-1
-                    }, 1000);
-                    
-                    // console.log(v)
+                        $('html').css('cursor', "url('/images/ghost1.png'), auto");
+                    }, 600);
+                    socket.emit('ClickGhost',this.dataset.index)
+                    setTimeout(function(){
+                        coolingClickGhost(obj);
+                    },1000);
                 }
-                else{
-                    $('.score').html()
-                }
-                socket.on('scaresGhost', function(ScaredGhost){
-                    console.log('olololo -1')
-                    $('.content').html()+$('.content').append('<b>'+ScaredGhost+' : '+'-1'+'</b><br><br>');
-                })
 	    })
+	    socket.on('heHaveScore', function(){
+            var now = $('.score').html()
+            var plus = 1
+            $('.score').html(parseInt(now)+parseInt(plus));
+            $('.score').css('transform', 'scale(3)');
+            setTimeout(function() {
+                $('.score').css('transform', 'scale(1)');
+            }, 100);
+                
+            var nameScore = document.getElementById('name').value;
+            var countScore = document.getElementById('score').textContent;
+            var score = {}
+            score.name = nameScore
+            score.count = countScore
+            socket.emit('Score', score)
+        })
+	    socket.on('scaresGhost', function(scaredGhost){
+            // console.log('меня напугали и я получил id:'+scaredGhost);
+            // if($('.score').html() > '0'){
+                var now = $('.score').html()
+                socket.emit('canGive',now)
+                var minus = -1
+                $('.score').html(parseInt(now)+parseInt(minus));
+                $('.score').css('transform', 'scale(3)');
+                $('.score').css('color', 'red');
+                setTimeout(function() {
+                    $('.score').css('transform', 'scale(1)');
+                    $('.score').css('color', 'white');
+                }, 100);
+                
+                var nameScore = document.getElementById('name').value;
+                var countScore = document.getElementById('score').textContent;
+                var score = {}
+                score.name = nameScore
+                score.count = countScore
+                socket.emit('Score', score)
+                
+                $('html').css('cursor', "url('/images/ghost3.png'), auto");
+                setTimeout(function() {
+                    $('html').css('cursor', "url('/images/ghost1.png'), auto");
+                }, 1000);
+                // $('.content').html()+$('.content').append('<b>'+document.getElementById('name').value+': '+document.getElementById('score').textContent+'</b><br><br>');
+            // }
+        })
 });
